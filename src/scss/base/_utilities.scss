@@ -1,0 +1,18 @@
+.u-center-text { text-align: center !important; }
+
+.u-msmall { margin: 1.5rem !important; }
+.u-mtsmall { margin-top: 1.5rem !important; }
+.u-mbsmall { margin-bottom: 1.5rem !important; }
+
+.u-mmedium { margin: 4rem !important; }
+.u-mtmedium { margin-top: 4rem !important; }
+.u-mbmedium { margin-bottom: 4rem !important; }
+
+.u-mbig { margin: 8rem !important; }
+.u-mtbig { margin-top: 8rem !important; }
+.u-mbbig { 
+    margin-bottom: 8rem !important;
+    @include respond(tab-port){
+        margin-bottom: 5rem !important;
+    }
+}

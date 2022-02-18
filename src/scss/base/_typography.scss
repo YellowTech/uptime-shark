@@ -1,0 +1,63 @@
+body {
+    font-family: "Lato", sans-serif;
+    font-weight: 400;
+    /* font-size: 1.6rem; */
+    line-height: 1.7;
+    color: $color-font;
+}
+
+.heading-primary {
+    color: $color-font;
+    text-transform: uppercase;
+
+    backface-visibility: hidden;
+
+    font-size: 4rem;
+
+    text-decoration: none;
+
+    display: flex;
+    align-items: center;
+    margin-left: 2rem;
+    // font-weight: 100;
+    // letter-spacing: 1rem;
+
+    // @include respond(phone) {
+    //     letter-spacing: 1rem;
+    //     font-size: 5rem;
+    // }
+
+    @include respond(tab-land) {
+        font-size: 3.3rem;
+        margin-left: 1rem;
+    }
+}
+
+.heading-secondary {
+    font-size: 3.5rem;
+    font-weight: 400;
+
+    // letter-spacing: .2rem;
+
+    @include respond(tab-port) {
+        font-size: 3rem;
+    }
+
+    @include respond(phone) {
+        font-size: 2.5rem;      
+    }
+}
+
+.heading-tertiary {
+    font-size: $default-font-size;
+    font-weight: 700;
+    text-transform: uppercase;
+}
+
+.paragraph {
+    font-size: $default-font-size;
+
+    &:not(:last-child) {
+        margin-bottom: 3rem;
+    }
+}

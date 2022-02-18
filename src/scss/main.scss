@@ -1,0 +1,41 @@
+@import "abstracts/functions";
+@import "abstracts/mixins";
+@import "abstracts/variables";
+
+@import "base/base";
+@import "base/animations";
+@import "base/typography";
+@import "base/utilities";
+
+@import "components/button";
+@import "components/form";
+@import "components/svganimated";
+
+@import "layout/header";
+@import "layout/grid";
+@import "layout/footer";
+@import "layout/navigation";
+
+// @import "pages/home";
+@import "pages/status";
+
+
+/*
+BEM
+Block Element Modifier
+.block {}
+.block__element {}
+.block__element--modifier {}
+
+Recipe section
+.recipe
+Subsection for info
+.recipe__info
+Style for infonames
+.recipe__info-name
+Styles for specific info names
+.recipe__info-name--1
+.recipe__info-name--2
+*/
+
+

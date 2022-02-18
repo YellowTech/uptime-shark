@@ -1,0 +1,20 @@
+.svganim {
+  stroke-dasharray: 100;
+  stroke-dashoffset: 100;
+  stroke: $color-font;
+  stroke-width: 3;
+  animation: dash 1.3s cubic-bezier(.48,.16,.13,.88) forwards;
+//   https://cubic-bezier.com/#.48,.16,.13,.88
+
+  transition: stroke-width 0.3s;
+
+  &:hover {
+      stroke-width: 5;
+  }
+}
+
+@keyframes dash {
+    to {
+      stroke-dashoffset: 0;
+    }
+  }

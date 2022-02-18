@@ -1,0 +1,56 @@
+*, *::after, *::before {
+    margin: 0;
+    padding: 0;
+    box-sizing: inherit;
+}
+
+html {
+    /* set rem to 62.5% of the browser defined rem, which is 16 by default -> rem = 10px */
+    // this defines what 1 rem is
+    font-size: 62.5%; // 1rem = 10px
+
+
+    @include respond(tab-land) {
+        font-size: 56.25%; // 1 rem = 9px, 9/16 = 56.25%
+    }
+
+    @include respond(tab-port) {
+        font-size: 50%; // 1rem = 8px, 8/16 = 50%
+    }
+
+    @include respond(big-desktop) {
+        font-size: 75%;
+    }
+}
+
+body {
+    min-width: 350px;
+    box-sizing: border-box;
+    padding: 3rem;
+    background-color: $color-bg-far;
+
+    @include respond(tab-port) {
+        padding: 0;
+    }
+}
+
+.container {
+    padding: 5rem;
+    background-color: $color-bg;
+    border-radius: 30px;
+    max-width: $grid-width;
+    margin: auto;
+
+    @include respond(tab-port) {
+        // padding: 5rem;
+        border-radius: 0px;
+    }
+}
+
+// change highlighting color
+::selection {
+    background-color: $color-primary;
+    color: $color-bg;
+}
+
+

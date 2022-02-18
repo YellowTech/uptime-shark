@@ -1,0 +1,17 @@
+.nav {
+    align-self: center;
+    text-align: right;
+    font-size: 2.5rem;
+
+    a {
+        color: $color-font-dark;
+        text-decoration: none;
+        margin-right: 3rem;
+        margin-left: 3rem;
+    }
+    
+    .router-link-active {
+        color: $color-secondary-light;
+    }
+}
+
