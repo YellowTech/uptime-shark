@@ -1,7 +1,12 @@
 <template>
+  <h1 v-if="this.$store.state.error">Error Occurred</h1>
   <div class="heading-secondary">Services</div>
-  <div class="service-list">
-    <ServiceEntry v-for="item in statusList" :key="item.name" :serviceName="item.name" :serviceStatus="item.status"></ServiceEntry>
+  <h1 v-if="!this.$store.state.loaded">Loading</h1>
+  <div v-else>
+    <div v-if="!this.$store.state.error" class="service-list bubble">
+      <ServiceEntry v-for="item in monitorList" :key="item.name" :serviceName="item.name" :serviceStatus="item.status"></ServiceEntry>
+    </div>
+
   </div>
 
 </template>
@@ -10,11 +15,10 @@
   import ServiceEntry from '@/components/ServiceEntry.vue';
   import { computed } from 'vue'
   import store from '../store'
-  import {Istate} from '../store/interfaces'
 
   // const props = defineProps([''])
 
-  const statusList = computed(() => {
-    return store.state.status as unknown as Istate
+  const monitorList = computed(() => {
+    return store.state.monitors
   })
 </script>

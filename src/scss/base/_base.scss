@@ -37,7 +37,7 @@ body {
 .container {
     padding: 5rem;
     background-color: $color-bg;
-    border-radius: 30px;
+    border-radius: $border-radius-sitewide;
     max-width: $grid-width;
     margin: auto;
 

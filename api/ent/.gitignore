@@ -1,0 +1,5 @@
+# ignore all except schemas and generate
+
+*.go
+!schema/*
+!generate.go

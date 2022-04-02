@@ -1,5 +1,5 @@
 <template>
-  <div class="hello">
+  <div class="service-entry">
     <h1>{{ props.serviceName }}</h1>
     <p>{{ props.serviceStatus }}</p>
   </div>

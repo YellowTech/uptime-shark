@@ -32,9 +32,12 @@
   import { onBeforeMount } from 'vue'
   import store from './store'
   onBeforeMount(() => {
+    console.log(store.dispatch('fetchData'))
+    
     // eslint-disable-next-line
     var intervalId = setInterval(function() {
-      console.log(store.dispatch('fetchData'))
+      console.log("Fetching data")
+      store.dispatch('fetchData')
     }, 5000);
 
     // You can clear a periodic function by uncommenting:
