@@ -32,6 +32,7 @@
   import { onBeforeMount } from 'vue'
   import store from './store'
   onBeforeMount(() => {
+    console.log("first fetch")
     console.log(store.dispatch('fetchData'))
     
     // eslint-disable-next-line

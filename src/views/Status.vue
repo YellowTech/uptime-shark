@@ -1,10 +1,10 @@
 <template>
-  <h1 v-if="this.$store.state.error">Error Occurred</h1>
-  <div class="heading-secondary">Services</div>
+  <h1 v-if="this.$store.state.error">Oops! An Error Occurred...</h1>
+  <div v-else class="heading-secondary">Services</div>
   <h1 v-if="!this.$store.state.loaded">Loading</h1>
   <div v-else>
     <div v-if="!this.$store.state.error" class="service-list bubble">
-      <ServiceEntry v-for="item in monitorList" :key="item.name" :serviceName="item.name" :serviceStatus="item.status"></ServiceEntry>
+      <ServiceEntry v-for="item in monitorList" :key="item.name" :monitorEntry="item"></ServiceEntry>
     </div>
 
   </div>
