@@ -13,6 +13,18 @@
     transform: translate(-50%, -50%);
 }
 
+@mixin posNeg {
+    &.negative {
+        background: $color-status-negative-fallback;
+        background: $color-status-negative;
+    }
+
+    &.positive {
+        background: $color-status-positive-fallback;
+        background: $color-status-positive;
+    }
+}
+
 // Media Query Manager
 /*
 0-600px:      Phone

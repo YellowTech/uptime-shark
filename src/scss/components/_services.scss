@@ -6,7 +6,7 @@
 
 .service-entry {
     padding: 1rem;
-    border-radius: 20px;
+    border-radius: $border-radius-small;
 
     transition: background .3s;
     &:hover {
@@ -15,5 +15,39 @@
 
     &::after {
         margin-bottom: 2rem;
+    }
+}
+
+.service-status {
+    border-radius: $border-radius-small;
+    font-size: 2rem;
+    padding: 1rem;
+    
+    @include posNeg;
+}
+
+.service-name {
+    font-size: 3rem;
+    padding: 1rem;
+}
+
+.service-pills {
+    &-box {
+        display: flex;
+        justify-content: space-between;
+    }
+    &-pill {
+        @include posNeg;
+        
+        background-attachment: fixed;
+        flex: 1;
+        border-radius: $border-radius-small;
+        padding: 1rem 0;
+        margin: .5rem 0;
+
+        &:not(:last-child) {
+            margin-right: 1rem;
+        }
+        
     }
 }

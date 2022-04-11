@@ -22,6 +22,13 @@ $color-tertiary-dark: #5643fa;
 $color-gradient-1a: #8d3bff;
 $color-gradient-1b: #b53bff;
 
+$color-status-positive-fallback: rgb(128,218,147);
+$color-status-positive: linear-gradient(90deg, rgba(39,174,96,1) 0%, rgba(47,214,117,1) 100%);
+
+$color-status-negative-fallback: rgb(195,66,72);
+$color-status-negative: linear-gradient(90deg, rgba(195,66,72,1) 0%, rgba(247,84,91,1) 100%);
+// $color-status-positive: linear-gradient(90deg, rgba(39,174,96,1) 0%, rgba(24,108,60,1) 100%);
+
 // $color-bg-far: #101011;
 // $color-bg: #212529;
 $color-bg-far: #091029;
@@ -39,6 +46,9 @@ $color-grey-dark-1: #777;
 $color-grey-dark-2: #999;
 $color-grey-dark-3: #333;
 
+// Tooltip
+$color-tooltip: rgba($color-grey-light-1,.75);
+$color-tooltip-text: $color-grey-dark-3;
 
 // Font
 $default-font-size: 1.6rem;
@@ -52,4 +62,5 @@ $gutter-veritcal-small: 5rem;
 $gutter-horizontal: 6rem;
 
 
-$border-radius-sitewide: 30px;
+$border-radius-large: 30px;
+$border-radius-small: 10px;

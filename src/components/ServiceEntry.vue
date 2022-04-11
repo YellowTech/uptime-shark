@@ -1,9 +1,16 @@
 <template>
   <div class="service-entry">
-    <h1>{{ props.monitorEntry.name }}</h1>
+    <span :class="[props.monitorEntry.status?'positive':'negative', 'service-status']">{{uptimePercent * 100}}%</span>
+    <span class="service-name">{{ props.monitorEntry.name }}</span>
+
+    <span class="service-pills-box u-mtsmall">
+      <div class="service-pills-pill tooltip tooltip-fade" :class="[!log.Failed?'positive':'negative', 'service-status']" :data-tooltip="log.Message + ' - ' + timeConverter(log.Time)" v-for="log in props.monitorEntry.logs" :key="log.Time"></div>
+    </span>
+    <!-- <p>{{props.monitorEntry.id}}</p>
     <p>{{ props.monitorEntry.status }}</p>
     <p>{{ props.monitorEntry.url }}</p>
-    <p v-for="log in props.monitorEntry.logs" :key="log.Time">{{log.Message}}-{{timeConverter(log.Time)}}</p>
+    <p v-for="log in props.monitorEntry.logs" :key="log.Time">{{log.Message}} - {{timeConverter(log.Time)}}</p>
+    <p>{{props.monitorEntry.statusMessage}}</p> -->
   </div>
 </template>
 
@@ -23,8 +30,12 @@ export default class ServiceEntry extends Vue {
 </script> -->
 
 <script setup lang="ts">
-  import { defineProps } from 'vue'
+  import { computed, defineProps } from 'vue'
   import type { Monitor } from '@/store'
+
+  const uptimePercent = computed(() => {
+    return Number(props.monitorEntry.logs.filter(entry => !entry.Failed).length / props.monitorEntry.logs.length).toFixed(2)
+  })
 
   const props = defineProps<{
     monitorEntry: Monitor, 
