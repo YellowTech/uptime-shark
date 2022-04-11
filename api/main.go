@@ -183,7 +183,12 @@ func periodic(ctx context.Context, client *ent.Client) {
 					newLogs = newLogs[len(newLogs) - item.NrLogs :]
 				}
 				
-				itemUpdate.SetStatusMessage(fmt.Sprint(resp.StatusCode))
+				if resp != nil {
+					itemUpdate.SetStatusMessage(fmt.Sprint(resp.StatusCode))
+				} else {
+					itemUpdate.SetStatusMessage("Error")
+				}
+				
 				itemUpdate.SetLogs(newLogs)
 				itemUpdate.SetNextCheck(time.Now().Unix() + item.Interval)
 				itemUpdate.SaveX(ctx)
