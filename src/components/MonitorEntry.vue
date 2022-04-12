@@ -14,21 +14,6 @@
   </div>
 </template>
 
-<!-- <script lang="ts">
-import { Options, Vue } from 'vue-class-component';
-
-@Options({
-  props: {
-    name: String,
-    status: Boolean
-  }
-})
-export default class ServiceEntry extends Vue {
-  name!: string
-  status!: boolean
-}
-</script> -->
-
 <script setup lang="ts">
   import { computed, defineProps } from 'vue'
   import type { Monitor } from '@/store'
