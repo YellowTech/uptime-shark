@@ -18,8 +18,8 @@
         </header>
       </div>
       <div class="col-1-of-2 nav">
-          <router-link to="/">Status</router-link>
-          <router-link to="/about">Edit</router-link>
+          <router-link :to="{ name: 'Status'}">Status</router-link>
+          <router-link :to="{ name: 'Edit'}">Edit</router-link>
       </div>
     </div>
 
