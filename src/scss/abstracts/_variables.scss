@@ -19,15 +19,15 @@ $color-secondary-dark: #c03836;
 $color-tertiary-light: #2998ff;
 $color-tertiary-dark: #5643fa;
 
-$color-gradient-1a: #8d3bff;
-$color-gradient-1b: #b53bff;
-
 $color-status-positive-fallback: rgb(128,218,147);
 $color-status-positive: linear-gradient(90deg, rgba(39,174,96,1) 0%, rgba(47,214,117,1) 100%);
 
 $color-status-negative-fallback: rgb(195,66,72);
 $color-status-negative: linear-gradient(90deg, rgba(195,66,72,1) 0%, rgba(247,84,91,1) 100%);
 // $color-status-positive: linear-gradient(90deg, rgba(39,174,96,1) 0%, rgba(24,108,60,1) 100%);
+
+$color-gradient-violet-fallback: #8d3bff;
+$color-gradient-violet: linear-gradient(60deg, #8d3bff, #b53bff);
 
 // $color-bg-far: #101011;
 // $color-bg: #212529;
@@ -51,7 +51,7 @@ $color-tooltip: rgba($color-grey-light-1,.75);
 $color-tooltip-text: $color-grey-dark-3;
 
 // Font
-$default-font-size: 1.6rem;
+$default-font-size: 2.3rem;
 $color-font: #eff0f0;
 $color-font-dark: #66696c;
 

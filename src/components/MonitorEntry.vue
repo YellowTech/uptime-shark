@@ -1,11 +1,12 @@
 <template>
-  <div class="service-entry">
-    <span :class="[props.monitorEntry.status?'positive':'negative', 'service-status']">{{uptimePercent * 100}}%</span>
-    <span class="service-name">{{ props.monitorEntry.name }}</span>
-
-    <span class="service-pills-box u-mtsmall">
-      <div class="service-pills-pill tooltip tooltip-fade" :class="[!log.Failed?'positive':'negative', 'service-status']" :data-tooltip="log.Message + ' - ' + timeConverter(log.Time)" v-for="log in props.monitorEntry.logs" :key="log.Time"></div>
+  <div class="monitor-entry">
+    <span class="monitor-pills-box">
+      <div class="monitor-pills-pill tooltip tooltip-fade" :class="[!log.Failed?'positive':'negative', 'monitor-status']" :data-tooltip="log.Message + ' - ' + timeConverter(log.Time)" v-for="log in props.monitorEntry.logs" :key="log.Time"></div>
     </span>
+
+    <span :class="[props.monitorEntry.status?'positive':'negative', 'monitor-status']">{{uptimePercent * 100}}%</span>
+    <span class="monitor-name">{{ props.monitorEntry.name }}</span>
+
     <!-- <p>{{props.monitorEntry.id}}</p>
     <p>{{ props.monitorEntry.status }}</p>
     <p>{{ props.monitorEntry.url }}</p>

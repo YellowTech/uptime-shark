@@ -1,0 +1,47 @@
+.input-group {
+    padding-right: 2rem;
+    padding-bottom: 1rem;
+
+    label {
+        font-size: 2rem;
+    }
+    
+    input {
+        color: $color-font;
+        display: block;
+        width: 100%;
+        padding: .5rem .75rem;
+        font-size: 2rem;
+        line-height: 1.5;
+        background: $color-bg-near;
+        background-clip: padding-box;
+        border: 1px solid $color-font;
+        appearance: none;
+        border-radius: $border-radius-small;
+        border-color: $color-font;
+        transition: border-color .15s ease-in-out,box-shadow .15s ease-in-out;
+        
+        &:focus {
+            border-color: rgba($color-font, 0);
+            outline: 0;
+            box-shadow: 0 0 0 .25rem rgba($color-gradient-violet-fallback, .5);
+        }
+
+        &[type="checkbox"] {
+            width: 3rem;
+            height: 3rem;
+            border-radius: $border-radius-small*0.8;
+            background-repeat: no-repeat;
+            background-position: center;
+            background-size: 0% 0%;
+            background-image: url("data:image/svg+xml,%3csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 20 20'%3e%3cpath transform='matrix(1 0 0 0.82 10 9.66)' fill='none' stroke='%23fff' stroke-linecap='round' stroke-linejoin='round' stroke-width='2' d='M -4.65 1.35363 L -1.25 6.54 L 4.65 -4.54'/%3e%3c/svg%3e");
+
+            transition: background-size 0.2s;
+
+            &:checked {
+                border-color: $color-gradient-violet-fallback;
+                background-size: 80% 80%;
+            }
+        }
+    }
+}

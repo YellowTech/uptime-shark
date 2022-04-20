@@ -19,16 +19,49 @@ const monitor = iots.type({
   inverted: withFallback(iots.boolean, false),
   mode: iots.string,
   url: iots.string,
-  logs: iots.array(logEntry),
+  logs: withFallback(iots.array(logEntry), []),
 })
+
+type MonitorEdit = {
+    id: string,
+    name: string,
+    interval: number,
+    status: boolean,
+    inverted: boolean,
+    mode: string,
+    url: string,
+}
 
 const monitors = iots.array(monitor)
 // export interface Monitor = monitor._A
 type Monitors = typeof monitors._A
 type Monitor = typeof monitor._A
+
+// class MonitorClass implements Monitor {
+//     constructor() {
+//         this.Id = "";
+//         this.Name = "";
+//         this.Interval = 0;
+//         this.Status = true;
+//         this.StatusMessage = "";
+//         this.Inverted = "";
+//     }
+
+//     Id: String;
+//     Name: String;
+//     Interval: Number;
+//     Status: Boolean;
+//     StatusMessage: String;
+//     Inverted: Boolean;
+//     Mode: String;
+//     Url: String;
+//     Logs: typeof logEntry._A;
+// }
+
 export type {
   Monitors,
-  Monitor
+  Monitor,
+  MonitorEdit
 }
 
 export default createStore({

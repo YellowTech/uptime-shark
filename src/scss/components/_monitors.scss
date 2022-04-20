@@ -1,10 +1,9 @@
-.service-list {
+.monitor-list {
     margin-left: -2rem;
     margin-right: -2rem;
-    
 }
 
-.service-entry {
+.monitor-entry {
     padding: 1rem;
     border-radius: $border-radius-small;
 
@@ -16,9 +15,14 @@
     &::after {
         margin-bottom: 2rem;
     }
+
+
+    &:not(:last-child) {
+        margin-bottom: 3rem;
+    }
 }
 
-.service-status {
+.monitor-status {
     border-radius: $border-radius-small;
     font-size: 2rem;
     padding: 1rem;
@@ -26,12 +30,12 @@
     @include posNeg;
 }
 
-.service-name {
+.monitor-name {
     font-size: 3rem;
     padding: 1rem;
 }
 
-.service-pills {
+.monitor-pills {
     &-box {
         display: flex;
         justify-content: space-between;
@@ -42,12 +46,67 @@
         background-attachment: fixed;
         flex: 1;
         border-radius: $border-radius-small;
-        padding: 1rem 0;
+        padding: .5rem 0;
         margin: .5rem 0;
 
         &:not(:last-child) {
-            margin-right: 1rem;
+            margin-right: .3rem;
         }
         
+    }
+}
+
+.monitor-edit-list {
+    a {
+        color: $color-font;
+        text-decoration: none;
+        font-size: 2rem;
+    }
+
+    &-entry {
+        display: inline-block;
+        // background: $color-gradient-violet-fallback;
+        background: $color-gradient-violet; 
+        border-radius: $border-radius-small;
+        padding: .5rem 1rem;
+        margin-right: 1rem;
+        @include afterOverlay-parent;
+
+        &:hover {
+            &::after {
+                background: rgba(0,0,0,.3)
+            }
+        }
+        
+        &::after {
+            @include afterOverlay-child;
+            border-radius: $border-radius-small;
+            background: rgba(0,0,0,0);
+            transition: background .3s;
+        }
+    }
+
+    &-new {
+        display: inline-block;
+        background: $color-status-positive-fallback;
+        background: $color-status-positive;
+        border-radius: $border-radius-small;
+        padding: .5rem 1rem;
+        margin-right: 1rem;
+
+        @include afterOverlay-parent;
+
+        &:hover {
+            &::after {
+                background: rgba(0,0,0,.3)
+            }
+        }
+        
+        &::after {
+            @include afterOverlay-child;
+            border-radius: $border-radius-small;
+            background: rgba(0,0,0,0);
+            transition: background .3s;
+        }
     }
 }

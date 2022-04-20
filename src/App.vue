@@ -1,8 +1,8 @@
 <template>
   <div class="container">
-    <div class="row">
+    <div class="header row">
       <div class="col-1-of-2">
-        <header class="header">
+        <div class="page-title">
           <router-link to="/">
             <svg class="svganim" width="100" height="100" version="1.1" viewBox="0 0 100 100" xmlns="http://www.w3.org/2000/svg">
               <g fill="none">
@@ -15,7 +15,7 @@
             </svg>
           </router-link>
           <router-link to="/" class="heading-primary">Uptime Shark</router-link>
-        </header>
+        </div>
       </div>
       <div class="col-1-of-2 nav">
           <router-link :to="{ name: 'Status'}">Status</router-link>
