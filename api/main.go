@@ -1,35 +1,25 @@
 package main
 
 import (
-	//"crypto/rand"
 	"context"
 	"errors"
 	"fmt"
 	"log"
-	randMath "math/rand"
 	"net/http"
-
-	// "sync"
+	"os"
 	"time"
 	"uptime/api/ent"
 	Monitor "uptime/api/ent/monitor"
 	"uptime/api/logentry"
+	"uptime/api/notifications"
 
 	"github.com/gin-gonic/gin"
 	"github.com/google/uuid"
-	// "entgo.io/ent"
-	// "golang.org/x/crypto/bcrypt"
-	"net/url"
 
-	"github.com/gin-contrib/cors"
+	"net/url"
 
 	_ "github.com/mattn/go-sqlite3"
 )
-
-// type State struct {
-// 	mu sync.Mutex
-// 	v  map[(string, string)]bool
-// }
 
 type MonitorEdit struct {
 	Id *string `json:"id" xml:"user"  binding:"required"`
@@ -41,16 +31,7 @@ type MonitorEdit struct {
 	Url string `json:"url" binding:"required"`
 }
 
-const letterBytes = "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ"
-
-func RandStringBytes(n int) string {
-	b := make([]byte, n)
-	for i := range b {
-		b[i] = letterBytes[randMath.Intn(len(letterBytes))]
-	}
-	return string(b)
-}
-
+// receiving edits from user
 func postEdit(c *gin.Context) {
 	var editMonitor MonitorEdit
 	if err := c.ShouldBindJSON(&editMonitor); err != nil {
@@ -61,7 +42,9 @@ func postEdit(c *gin.Context) {
 	// test the url
 	var err error
 	_, err = url.ParseRequestURI(editMonitor.Url)
-	if (err == nil) {
+
+	// do not check if inverted
+	if (err == nil && !*editMonitor.Inverted) {
 		httpClient := http.Client{
 			Timeout: time.Duration(5 * time.Second),
 		}
@@ -72,6 +55,10 @@ func postEdit(c *gin.Context) {
 				err = errors.New("URL: status code not OK")
 			}
 		}
+	} else if err != nil {
+		// url not valid
+		c.JSON(http.StatusBadRequest, gin.H{"error": "URI is not valid"})
+		return
 	}
 
 	// check if valid uuid
@@ -82,6 +69,7 @@ func postEdit(c *gin.Context) {
 			_, err = client.Monitor.Query().Where(Monitor.ID(checkedId)).First(ctx)
 		}
 	}
+
 	var updated *ent.Monitor
 	if (err == nil) {
 		// url is valid and id is either empty or valid
@@ -115,18 +103,18 @@ func postEdit(c *gin.Context) {
 		}
 	}
 
-
 	if (err != nil) {
 		c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
 		return
 	}
 
-	log.Println("new edit received: ", editMonitor)
+	log.Println("New edit received: ", editMonitor)
 	log.Println(updated)
 
-	c.JSON(http.StatusOK, editMonitor)//gin.H{"status": "ok"})
+	c.JSON(http.StatusOK, editMonitor)
 }
 
+// reveiving deletion requests
 func postRemove(c *gin.Context) {
 	var editMonitor MonitorEdit
 	if err := c.ShouldBindJSON(&editMonitor); err != nil {
@@ -151,7 +139,7 @@ func postRemove(c *gin.Context) {
 	} else {
 		log.Println("new remove received: ", editMonitor.Name)
 		c.JSON(http.StatusOK, editMonitor.Id)
-		// Todo secure
+		// TODO secure
 	}
 }
 
@@ -175,24 +163,14 @@ func cookieTest(c *gin.Context) {
 	c.String(http.StatusOK, fmt.Sprint())
 }
 
-// func redir(c *gin.Context) {
-// 	c.Redirect(http.StatusPermanentRedirect, "/tea")
-// }
-
-// func getClient(c *gin.Context) {
-// 	c.File("./client.html")
-// }
-
 var ctx = context.Background()
 var client *ent.Client = nil
+var notify []*notifications.NotificationService = nil
 
 func main() {
-
-	randMath.Seed(time.Now().UnixNano())
-
 	fmt.Println("Starting Server")
 
-	client2, err := ent.Open("sqlite3", "./ent.sqlite3?mode=memory&cache=shared&_fk=1")
+	client2, err := ent.Open("sqlite3", "./db/db.sqlite3?mode=memory&cache=shared&_fk=1")
 	client = client2
 
     if err != nil {
@@ -205,32 +183,44 @@ func main() {
         log.Fatalf("failed creating schema resources: %v", err)
     }
 
-	// ctx := context.Background()
-
 	// create test entry
-	u, err := CreateService("Google", ctx, client)
-	log.Println(err, u)
+	CreateService("Google", ctx, client)
 
-	// status = append(status, Status{Name: "Google", Service: "http://google.com", Status: false})
-	// status = append(status, Status{Name: "Lel", Service: "http://lel.yellowtech.ch", Status: false})
+	// delete all notifications
+	client.Notification.Delete().ExecX(ctx)
 
+	// create notification service from environment variables
+	{
+		key := os.Getenv("TELEGRAMKEY")
+		chatId := os.Getenv("TELEGRAMCHAT")
+		if key != "" && chatId != "" {
+			client.Notification.Create().
+				SetName("Telegram").
+				SetActive(true).
+				SetSettings([]string{"telegram", key, chatId}).
+				SaveX(ctx)
+		}
+	}
+
+	// Initialize notification setup
+	notify, err = notifications.SetupNotifications(client, ctx)
+
+	if (err != nil) {
+		log.Fatalf("Failed loading notification entries: %v", err)
+    }
+
+	log.Println("Notification services loaded: ", notify)
+
+	// launch go routine for periodic checking
 	go periodic(ctx, client)
 
-	gin.SetMode(gin.DebugMode)
-	// gin.SetMode(gin.ReleaseMode)
-	router := gin.Default()
+	if os.Getenv("DEBUG") == "true" {
+		gin.SetMode(gin.DebugMode)
+	} else {
+		gin.SetMode(gin.ReleaseMode)
+	}
 
-	router.Use(cors.New(cors.Config{
-        AllowOrigins:     []string{"http://localhost:8080"},
-        AllowMethods:     []string{"GET", "PATCH"},
-        AllowHeaders:     []string{"Origin"},
-        ExposeHeaders:    []string{"Content-Length"},
-        AllowCredentials: true,
-        AllowOriginFunc: func(origin string) bool {
-            return origin == "https://github.com"
-        },
-        MaxAge: 12 * time.Hour,
-    }))
+	router := gin.Default()
 
 	router.GET("/cookie", cookieTest)
 	router.GET("/api/status", getStatus)
@@ -280,56 +270,94 @@ func CreateService(name string, ctx context.Context, client *ent.Client) (*ent.M
     return u, err
 }
 
-
+// go routine that periodically checks all monitors
 func periodic(ctx context.Context, client *ent.Client) {
 	timeout := time.Duration(5 * time.Second)
 	httpClient := http.Client{
 		Timeout: timeout,
 	}
 
+	// do indefinitely
 	for {
-		monitors := client.Monitor.Query().AllX(ctx)
+		monitors, err := client.Monitor.Query().All(ctx)
+		if err != nil {
+			log.Println("Error loading monitors: ", err)
+			notifications.SendMessageToAll(notify, "Error: Loading Monitors failed: " + fmt.Sprint(err))
+			time.Sleep(time.Second * 10)
+			continue
+		}
 		
-		for i := range monitors {
-			item := monitors[i]
+		for _, item := range monitors {
 			
 			// if needs update
 			if item.NextCheck < time.Now().Unix() {
-				fmt.Println("Updating ", item.Name)
+				log.Println("Updating ", item.Name)
 				itemUpdate := item.Update()
+				// make http request
 				resp, err := httpClient.Get(item.URL)
-
-				newLogs := item.Logs
-
-				// item.mu.Lock()
+				
+				// the new log entry that is being created
+				var newLogEntry logentry.LogEntry
+				
+				// evaluating the results of the request
 				if err != nil || resp.StatusCode >= 300 {
-					fmt.Println(item.Name, err.Error())
-					newLogs = append(newLogs, 
-						logentry.LogEntry{Failed: true,Message: "ERROR",Time: time.Now().Unix()},
-					)
-					itemUpdate.SetStatus(false)
+					newLogEntry = logentry.LogEntry { Failed: true, Message: "ERROR", Time: time.Now().Unix()}
 				} else {
 					fmt.Println(item.Name, resp.StatusCode)
-					newLogs = append(newLogs, 
-						logentry.LogEntry{Failed: false,Message: "OK",Time: time.Now().Unix()},
-					)
-					itemUpdate.SetStatus(true)
+					newLogEntry = logentry.LogEntry{Failed: false,Message: "OK",Time: time.Now().Unix()}
 				}
-				
-				if (len(newLogs) > item.NrLogs) {
-					newLogs = newLogs[len(newLogs) - item.NrLogs :]
+
+				// if inverted -> invert the failed status
+				if item.Inverted {
+					newLogEntry.Failed = !newLogEntry.Failed
 				}
-				
+
+				// the log entry list of the monitor
+				logList := item.Logs
+
+				logList = append(logList, newLogEntry)
+
+				// if the logList is too long, shorten to the correct amount
+				if (len(logList) > item.NrLogs) {
+					logList = logList[len(logList) - item.NrLogs :]
+				}
+
+				// check if the status of the monitor needs to be changed
+				// if failed and positive status => alert
+				// if not failed and negative status => alert
+				if newLogEntry.Failed == item.Status {
+					itemUpdate.SetStatus(!newLogEntry.Failed)
+					log.Println("Status change for " + item.Name + " deteceted")
+
+					// change messages depending on if inverted or not
+					if item.Inverted {
+						if newLogEntry.Failed {
+							notifications.SendMessageToAll(notify, "🔴 " + item.Name + "(inverted) is reachable")
+						} else {
+							notifications.SendMessageToAll(notify, "🟢 " + item.Name + "(inverted) is unreachable")
+						}
+					} else {
+						if newLogEntry.Failed {
+							notifications.SendMessageToAll(notify, "🔴 " + item.Name + " went down")
+						} else {
+							notifications.SendMessageToAll(notify, "🟢 " + item.Name + " is up")
+						}
+					}
+				}
+
+				// set status message of monitor item
 				if resp != nil {
 					itemUpdate.SetStatusMessage(fmt.Sprint(resp.StatusCode))
 				} else {
 					itemUpdate.SetStatusMessage("Error")
 				}
 				
-				itemUpdate.SetLogs(newLogs)
+				itemUpdate.SetLogs(logList)
 				itemUpdate.SetNextCheck(time.Now().Unix() + item.Interval)
-				itemUpdate.SaveX(ctx)
-				// item.mu.Unlock()
+				_, err = itemUpdate.Save(ctx)
+				if err!= nil {
+					log.Println("Error saving monitor update for " + item.Name + ":", err)
+				}
 			}
 		}
 

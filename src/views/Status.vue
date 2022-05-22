@@ -17,8 +17,6 @@
   import { computed } from 'vue'
   import store from '../store'
 
-  // const props = defineProps([''])
-
   const monitorList = computed(() => {
     return store.state.monitors
   })

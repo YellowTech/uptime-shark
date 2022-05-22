@@ -4,14 +4,10 @@
       <div class="monitor-pills-pill tooltip tooltip-fade" :class="[!log.Failed?'positive':'negative', 'monitor-status']" :data-tooltip="log.Message + ' - ' + timeConverter(log.Time)" v-for="log in props.monitorEntry.logs" :key="log.Time"></div>
     </span>
 
-    <span :class="[props.monitorEntry.status?'positive':'negative', 'monitor-status']">{{uptimePercent * 100}}%</span>
-    <span class="monitor-name">{{ props.monitorEntry.name }}</span>
-
-    <!-- <p>{{props.monitorEntry.id}}</p>
-    <p>{{ props.monitorEntry.status }}</p>
-    <p>{{ props.monitorEntry.url }}</p>
-    <p v-for="log in props.monitorEntry.logs" :key="log.Time">{{log.Message}} - {{timeConverter(log.Time)}}</p>
-    <p>{{props.monitorEntry.statusMessage}}</p> -->
+    <span :class="[props.monitorEntry.status?'positive':'negative', 'monitor-status']">{{uptimePercent}}%</span>
+    <span class="monitor-name">{{ props.monitorEntry.name }}
+      <span v-if="props.monitorEntry.inverted">(inverted)</span>
+    </span>
   </div>
 </template>
 
@@ -20,7 +16,7 @@
   import type { Monitor } from '@/store'
 
   const uptimePercent = computed(() => {
-    return Number(props.monitorEntry.logs.filter(entry => !entry.Failed).length / props.monitorEntry.logs.length).toFixed(2)
+    return Number(props.monitorEntry.logs.filter(entry => !entry.Failed).length / props.monitorEntry.logs.length * 100).toFixed(0)
   })
 
   const props = defineProps<{

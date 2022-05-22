@@ -12,7 +12,6 @@ type Monitor struct {
 	ent.Schema
 }
 
-// Fields of the User.
 func (Monitor) Fields() []ent.Field {
 	return []ent.Field{
 		field.UUID("id", uuid.UUID{}).
@@ -36,12 +35,9 @@ func (Monitor) Fields() []ent.Field {
 
 		field.String("url").MaxLen(1024),
 		field.Int("retries"),
-
-		
 	}
 }
 
-// Edges of the User.
 func (Monitor) Edges() []ent.Edge {
 	return nil
 }
