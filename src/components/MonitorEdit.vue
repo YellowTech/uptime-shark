@@ -1,6 +1,6 @@
 <template>
   <div class="heading-secondary">Edit Monitor</div>
-  <h1 v-if="!this.$store.state.loaded">Loading</h1>
+  <h1 v-if="!$store.state.loaded">Loading</h1>
   <div v-else>
     <div class="monitor-edit-list">
       <a href="#" class="monitor-edit-list-new u-mtsmall" @click="resetEdit()">+ New Monitor</a>
@@ -96,7 +96,7 @@
   function resetEdit() {
     monitorEdit.id = ""
     monitorEdit.name = ""
-    monitorEdit.interval = 60
+    monitorEdit.interval = 300
     monitorEdit.enabled = true
     monitorEdit.inverted = false
     monitorEdit.mode = "http"

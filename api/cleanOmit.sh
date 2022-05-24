@@ -1,6 +1,8 @@
 #!/bin/bash
+# remove all "omitempty" from the generated json types 
+# such that false is not always removed
 
-cd ./api/ent
+cd ./ent
 if [[ $OSTYPE == 'darwin'* ]]; 
 then
     echo 'executing on macOS'

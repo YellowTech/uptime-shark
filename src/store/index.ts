@@ -48,7 +48,7 @@ export type {
 export default createStore({
     state: {
         counter: 0,
-        apiDomain: "http://localhost:8000",
+        apiDomain: "",
         error: false,
         errorMessage: "",
         loaded: false,
@@ -58,13 +58,11 @@ export default createStore({
     mutations: {
         increment(state) {
             state.counter++;
-            // this.$store.commit('increase');
         },
     },
     actions: {
         increment(context) {
             context.commit("increment");
-            // this.$store.dispatch('increase');
         },
 
         fetchData() {

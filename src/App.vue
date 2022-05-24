@@ -23,7 +23,7 @@
       </div>
     </div>
 
-    <h1 v-if="this.$store.state.error">Oops! An Error Occurred... <br> {{this.$store.state.errorMessage}}</h1>
+    <h1 v-if="$store.state.error">Oops! An Error Occurred... <br> {{$store.state.errorMessage}}</h1>
     <router-view v-else/>
   </div>
 </template>
@@ -31,6 +31,7 @@
 <script setup lang="ts">
   import { onBeforeMount } from 'vue'
   import store from './store'
+  // import store from './store'
   onBeforeMount(() => {
     store.dispatch('fetchData')
     store.dispatch('checkLogin')

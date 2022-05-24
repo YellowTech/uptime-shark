@@ -7,6 +7,7 @@ import (
 	"log"
 	"net/http"
 	"os"
+	"path/filepath"
 	"strings"
 	"time"
 	"uptime/api/authentication"
@@ -186,8 +187,12 @@ var notify []*notifications.NotificationService = nil
 func main() {
 	fmt.Println("Starting Server")
 
-	client2, err := ent.Open("sqlite3", "./db/db.sqlite3?mode=memory&cache=shared&_fk=1")
-	client = client2
+	newpath := filepath.Join(".", "db")
+	err := os.MkdirAll(newpath, os.ModePerm)
+
+	if (err == nil) {
+		client, err = ent.Open("sqlite3", "./db/db.sqlite3?mode=memory&cache=shared&_fk=1")
+	}
 
     if err != nil {
         log.Fatalf("failed opening connection to sqlite: %v", err)
@@ -240,6 +245,21 @@ func main() {
 
 	// Recovery middleware recovers from any panics and writes a 500 if there was one.
 	router.Use(gin.Recovery())
+
+	// Static files from frontend
+	router.Static("/css", "./dist/css")
+	router.Static("/fonts", "./dist/fonts")
+	router.Static("/js", "./dist/js")
+	router.StaticFile("/favicon.ico", "./dist/favicon.ico")
+	router.StaticFile("/android-chrome-192x192.png", "./dist/android-chrome-192x192.png")
+	router.StaticFile("/android-chrome-512x512.png", "./dist/android-chrome-512x512.png")
+	router.StaticFile("/apple-touch-icon.png", "./dist/apple-touch-icon.png")
+	router.StaticFile("/favicon-16x16.png", "./dist/favicon-16x16.png")
+	router.StaticFile("/favicon-32x32.png", "./dist/favicon-32x32.png")
+	router.StaticFile("/index.html", "./dist/index.html")
+	router.StaticFile("/", "./dist/index.html")
+	router.StaticFile("/edit", "./dist/index.html")
+	router.StaticFile("/site.webmanifest", "./dist/site.webmanifest")
 
 	router.GET("/api/status", getStatus)
 

@@ -1,8 +1,8 @@
 <template>
   <div class="heading-secondary">Monitors</div>
-  <h1 v-if="!this.$store.state.loaded">Loading</h1>
+  <h1 v-if="!$store.state.loaded">Loading</h1>
   <div v-else>
-    <div v-if="!this.$store.state.error" class="monitor-list bubble">
+    <div v-if="!$store.state.error" class="monitor-list bubble">
       <MonitorEntry v-for="item in monitorList" :key="item.name" :monitorEntry="item"></MonitorEntry>
     </div>
   </div>

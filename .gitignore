@@ -26,3 +26,5 @@ pnpm-debug.log*
 *.sw?
 
 db.sqlite3
+
+/api/dist/

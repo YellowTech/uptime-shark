@@ -1,5 +1,5 @@
 <template>
-  <Login v-if="!this.$store.state.authenticated" />
+  <Login v-if="!$store.state.authenticated" />
   <MonitorEdit v-else />
 </template>
 
