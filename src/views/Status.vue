@@ -1,15 +1,11 @@
 <template>
-  <h1 v-if="this.$store.state.error">Oops! An Error Occurred...</h1>
+  <div class="heading-secondary">Monitors</div>
+  <h1 v-if="!this.$store.state.loaded">Loading</h1>
   <div v-else>
-    <div class="heading-secondary">Monitors</div>
-    <h1 v-if="!this.$store.state.loaded">Loading</h1>
-    <div v-else>
-      <div v-if="!this.$store.state.error" class="monitor-list bubble">
-        <MonitorEntry v-for="item in monitorList" :key="item.name" :monitorEntry="item"></MonitorEntry>
-      </div>
+    <div v-if="!this.$store.state.error" class="monitor-list bubble">
+      <MonitorEntry v-for="item in monitorList" :key="item.name" :monitorEntry="item"></MonitorEntry>
     </div>
   </div>
-
 </template>
 
 <script setup lang="ts">
@@ -18,6 +14,6 @@
   import store from '../store'
 
   const monitorList = computed(() => {
-    return store.state.monitors
+    return store.state.monitors.filter(monitor => monitor.enabled)
   })
 </script>

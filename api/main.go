@@ -7,7 +7,9 @@ import (
 	"log"
 	"net/http"
 	"os"
+	"strings"
 	"time"
+	"uptime/api/authentication"
 	"uptime/api/ent"
 	Monitor "uptime/api/ent/monitor"
 	"uptime/api/logentry"
@@ -25,10 +27,21 @@ type MonitorEdit struct {
 	Id *string `json:"id" xml:"user"  binding:"required"`
 	Name string `json:"name" binding:"required"`
 	Interval int64 `json:"interval" binding:"required"`
-	Status *bool `json:"status" binding:"required"`
+	Enabled *bool `json:"enabled" binding:"required"`
 	Inverted *bool `json:"inverted" binding:"required"`
 	Mode string `json:"mode" binding:"required"`
 	Url string `json:"url" binding:"required"`
+}
+
+// Monitor is the model entity for the Monitor schema.
+type MonitorPrivate struct {
+	ID uuid.UUID `json:"id"`
+	Name string `json:"name"`
+	Enabled bool `json:"enabled"`
+	Status bool `json:"status"`
+	StatusMessage string `json:"statusMessage"`
+	Inverted bool `json:"inverted"`
+	Logs []logentry.LogEntry `json:"logs"`
 }
 
 // receiving edits from user
@@ -41,9 +54,14 @@ func postEdit(c *gin.Context) {
 
 	// test the url
 	var err error
+
+	// prepend https if there is no protocol mentioned
+	if !strings.HasPrefix(editMonitor.Url, "https://") && !strings.HasPrefix(editMonitor.Url, "http://") {
+		editMonitor.Url = "https://" + editMonitor.Url
+	}
 	_, err = url.ParseRequestURI(editMonitor.Url)
 
-	// do not check if inverted
+	// do not check reachability if inverted
 	if (err == nil && !*editMonitor.Inverted) {
 		httpClient := http.Client{
 			Timeout: time.Duration(5 * time.Second),
@@ -61,7 +79,7 @@ func postEdit(c *gin.Context) {
 		return
 	}
 
-	// check if valid uuid
+	// check if valid uuid and if exists
 	var checkedId uuid.UUID
 	if (err == nil && len(*editMonitor.Id) != 0) {
 		checkedId, err = uuid.Parse(*editMonitor.Id)
@@ -72,6 +90,7 @@ func postEdit(c *gin.Context) {
 
 	var updated *ent.Monitor
 	if (err == nil) {
+		// uuid was found in db
 		// url is valid and id is either empty or valid
 		if (len(*editMonitor.Id)==0) {
 			updated, err = client.Monitor.Create().
@@ -79,7 +98,7 @@ func postEdit(c *gin.Context) {
 				SetInterval(editMonitor.Interval).
 				SetNextCheck(0).
 				SetMode(editMonitor.Mode).
-				SetStatus(*editMonitor.Status).
+				SetEnabled(*editMonitor.Enabled).
 				SetInverted(*editMonitor.Inverted).
 				SetLogs(make([]logentry.LogEntry, 0)).
 				SetNrLogs(20).
@@ -95,7 +114,7 @@ func postEdit(c *gin.Context) {
 					SetInterval(editMonitor.Interval).
 					SetNextCheck(0).
 					SetMode(editMonitor.Mode).
-					SetStatus(*editMonitor.Status).
+					SetEnabled(*editMonitor.Enabled).
 					SetInverted(*editMonitor.Inverted).
 					SetURL(editMonitor.Url).
 					Save(ctx)
@@ -114,7 +133,7 @@ func postEdit(c *gin.Context) {
 	c.JSON(http.StatusOK, editMonitor)
 }
 
-// reveiving deletion requests
+// receiving deletion requests
 func postRemove(c *gin.Context) {
 	var editMonitor MonitorEdit
 	if err := c.ShouldBindJSON(&editMonitor); err != nil {
@@ -145,22 +164,19 @@ func postRemove(c *gin.Context) {
 
 func getStatus(c *gin.Context) {
 	list, _ := client.Monitor.Query().All(ctx)
-	c.JSON(http.StatusOK, list)
-	// c.SecureJSON(http.StatusOK, list)
-}
 
-func cookieTest(c *gin.Context) {
-	cookie, err := c.Cookie("auth")
-
-	if err != nil {
-		cookie = "NotSet"
-		c.SetSameSite(http.SameSiteStrictMode)
-		c.SetCookie("auth", "test", 3600, "/", "localhost", true, true)
+	// if not authenticated, send only limited information
+	if authentication.CheckAuthCookie(c) {
+		c.JSON(http.StatusOK, list)
+	} else {
+		var listPrivate []MonitorPrivate
+		for _, x := range list {
+			listPrivate = append(listPrivate, MonitorPrivate{ID: x.ID, Name: x.Name, Enabled: x.Enabled, Status: x.Status,
+				StatusMessage: x.StatusMessage, Inverted: x.Inverted, Logs: x.Logs})
+		}
+		
+		c.JSON(http.StatusOK, listPrivate)
 	}
-
-	fmt.Printf("Cookie value: %s \n", cookie)
-
-	c.String(http.StatusOK, fmt.Sprint())
 }
 
 var ctx = context.Background()
@@ -222,10 +238,20 @@ func main() {
 
 	router := gin.Default()
 
-	router.GET("/cookie", cookieTest)
+	// Recovery middleware recovers from any panics and writes a 500 if there was one.
+	router.Use(gin.Recovery())
+
 	router.GET("/api/status", getStatus)
-	router.POST("/api/edit", postEdit);
-	router.POST("/api/remove", postRemove);
+
+	authentication.InitializeAuth(router)
+
+	// Authorization group
+	authorized := router.Group("/", authentication.AuthRequired)
+	{
+		authorized.POST("/api/edit", postEdit);
+		authorized.POST("/api/remove", postRemove);
+	}
+
 
 	// use this for outside of Docker
 	router.Run("localhost:8000")
@@ -243,6 +269,7 @@ func CreateService(name string, ctx context.Context, client *ent.Client) (*ent.M
 			SetNextCheck(0).
 			SetMode("http").
 			SetStatus(true).
+			SetEnabled(true).
 			SetInverted(false).
 			SetLogs(make([]logentry.LogEntry, 0)).
 			SetNrLogs(20).
@@ -257,6 +284,7 @@ func CreateService(name string, ctx context.Context, client *ent.Client) (*ent.M
 			SetNextCheck(0).
 			SetMode("http").
 			SetStatus(true).
+			SetEnabled(true).
 			SetInverted(false).
 			SetLogs(make([]logentry.LogEntry, 0)).
 			SetNrLogs(20).
@@ -279,7 +307,7 @@ func periodic(ctx context.Context, client *ent.Client) {
 
 	// do indefinitely
 	for {
-		monitors, err := client.Monitor.Query().All(ctx)
+		monitors, err := client.Monitor.Query().Where(Monitor.Enabled(true)).All(ctx)
 		if err != nil {
 			log.Println("Error loading monitors: ", err)
 			notifications.SendMessageToAll(notify, "Error: Loading Monitors failed: " + fmt.Sprint(err))
@@ -322,7 +350,7 @@ func periodic(ctx context.Context, client *ent.Client) {
 					logList = logList[len(logList) - item.NrLogs :]
 				}
 
-				// check if the status of the monitor needs to be changed
+				// check if the last entry of the monitor needs to be changed
 				// if failed and positive status => alert
 				// if not failed and negative status => alert
 				if newLogEntry.Failed == item.Status {

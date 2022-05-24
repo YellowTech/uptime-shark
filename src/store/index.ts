@@ -11,22 +11,23 @@ const logEntry = iots.type({
 });
 
 const monitor = iots.type({
-  id: iots.string,
-  name: iots.string,
-  interval: iots.number,
-  status: withFallback(iots.boolean, false),
-  statusMessage: iots.string,
-  inverted: withFallback(iots.boolean, false),
-  mode: iots.string,
-  url: iots.string,
-  logs: withFallback(iots.array(logEntry), []),
-})
+    id: iots.string,
+    name: iots.string,
+    interval: withFallback(iots.number, 0),
+    enabled: withFallback(iots.boolean, false),
+    status: withFallback(iots.boolean, false),
+    statusMessage: iots.string,
+    inverted: withFallback(iots.boolean, false),
+    mode: withFallback(iots.string, "undefined"),
+    url: withFallback(iots.string, "undefined"),
+    logs: withFallback(iots.array(logEntry), []),
+});
 
 type MonitorEdit = {
     id: string,
     name: string,
     interval: number,
-    status: boolean,
+    enabled: boolean,
     inverted: boolean,
     mode: string,
     url: string,
@@ -37,26 +38,6 @@ const monitors = iots.array(monitor)
 type Monitors = typeof monitors._A
 type Monitor = typeof monitor._A
 
-// class MonitorClass implements Monitor {
-//     constructor() {
-//         this.Id = "";
-//         this.Name = "";
-//         this.Interval = 0;
-//         this.Status = true;
-//         this.StatusMessage = "";
-//         this.Inverted = "";
-//     }
-
-//     Id: String;
-//     Name: String;
-//     Interval: Number;
-//     Status: Boolean;
-//     StatusMessage: String;
-//     Inverted: Boolean;
-//     Mode: String;
-//     Url: String;
-//     Logs: typeof logEntry._A;
-// }
 
 export type {
   Monitors,
@@ -69,8 +50,10 @@ export default createStore({
         counter: 0,
         apiDomain: "http://localhost:8000",
         error: false,
+        errorMessage: "",
         loaded: false,
         monitors: monitors._A,
+        authenticated: false,
     },
     mutations: {
         increment(state) {
@@ -85,7 +68,9 @@ export default createStore({
         },
 
         fetchData() {
-            fetchTimeout(this.state.apiDomain + "/api/status", 3000)
+            fetchTimeout(this.state.apiDomain + "/api/status", 3000, {
+                credentials: "include",
+            })
                 .then((response) => response.text())
                 .then((text) => {
                     const data = JSON.parse(text.replace("while(1);", ""));
@@ -105,12 +90,31 @@ export default createStore({
                     console.log("Error when fetching: " + error.name);
                     this.state.loaded = true;
                     this.state.error = true;
+                    this.state.errorMessage = "Error reaching the server";
 
                     if (error.name === "AbortError") {
                         console.log("Timeout error");
                     } else if (error.name === "AbortError") {
                         console.log(`Error when decoding!`);
                     }
+                });
+        },
+
+        checkLogin() {
+            fetchTimeout(this.state.apiDomain + "/api/auth/status", 3000, {
+                credentials: "include",
+            })
+                .then((response) => {
+                    if (!response.ok) {
+                        this.state.authenticated = false;
+                    } else {
+                        this.state.authenticated = true;
+                    }
+                })
+                .catch((error) => {
+                    console.log(
+                        "Error when checking login status: " + error.name
+                    );
                 });
         },
     },

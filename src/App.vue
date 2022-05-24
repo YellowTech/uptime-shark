@@ -23,8 +23,8 @@
       </div>
     </div>
 
-
-    <router-view/>
+    <h1 v-if="this.$store.state.error">Oops! An Error Occurred... <br> {{this.$store.state.errorMessage}}</h1>
+    <router-view v-else/>
   </div>
 </template>
 
@@ -32,18 +32,19 @@
   import { onBeforeMount } from 'vue'
   import store from './store'
   onBeforeMount(() => {
-    console.log("first fetch")
-    console.log(store.dispatch('fetchData'))
+    store.dispatch('fetchData')
+    store.dispatch('checkLogin')
     
-    // eslint-disable-next-line
-    var intervalId = setInterval(function() {
-      console.log("Fetching data")
+    setInterval(function() {
       store.dispatch('fetchData')
     }, 5000);
 
-    // You can clear a periodic function by uncommenting:
-    // clearInterval(intervalId);
+    setInterval(function() {
+      if (store.state.authenticated)
+        store.dispatch('checkLogin')
+    }, 10000);
 
-    
+    // You can clear a periodic function by uncommenting:
+    // clearInterval(intervalId);    
   })
 </script>

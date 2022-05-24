@@ -2,9 +2,9 @@
   <div class="heading-secondary">Edit Monitor</div>
   <h1 v-if="!this.$store.state.loaded">Loading</h1>
   <div v-else>
-    <div class="monitor-edit-list u-mtsmall">
-      <a href="#" class="monitor-edit-list-new" @click="resetEdit()">+ New Monitor</a>
-      <a href="#" class="monitor-edit-list-entry" v-for="item in monitorList" :key="item.name" @click="chooseMonitor(item)">{{item.name}}
+    <div class="monitor-edit-list">
+      <a href="#" class="monitor-edit-list-new u-mtsmall" @click="resetEdit()">+ New Monitor</a>
+      <a href="#" class="monitor-edit-list-entry u-mtsmall" v-for="item in monitorList" :key="item.name" @click="chooseMonitor(item)">{{item.name}}
       </a>
     </div>
 
@@ -22,7 +22,7 @@
         </div>
         <div class="col-1-of-2 input-group">
           <label for="status">Enabled</label>
-          <input id="status" v-model="monitorEdit.status" type="checkbox"/>
+          <input id="status" v-model="monitorEdit.enabled" type="checkbox"/>
         </div>
         <div class="col-1-of-2 input-group">
           <label for="inverted">Inverted (reachable is bad)</label>
@@ -34,10 +34,14 @@
         </div>
       </div>
       <a class="btn positive" href="#" @click="sendEdit()">Submit</a>
+      <span class="heading-tertiary">{{ message }}</span>{{ errorMessage }}
       <span class="float-right" v-if="monitorEdit.id != ''">
         <a class="btn negative" href="#" v-if="!confirmation" @click="confirmation = true">Remove Monitor "{{monitorEdit.name}}"</a>
         <a class="btn negative" href="#" v-if="confirmation" @click="sendRemove()">Are you sure?</a>
       </span>
+    </div>
+    <div v-else>
+      <div class="heading-tertiary u-mtsmall">{{ message }}</div>
     </div>
   </div>
 </template>
@@ -59,47 +63,70 @@
         id: "",
         name: "New Monitor",
         interval: 60,
-        status: true,
+        enabled: true,
         inverted: false,
         mode: "http",
         url: "http://example.com",
       }
     )
 
+  const message = ref<string>("")
+  const errorMessage = ref<string>("")
+
   function chooseMonitor(monitor: Monitor) {
-    monitorEdit.id = monitor.id
-    monitorEdit.name = monitor.name
-    monitorEdit.interval = monitor.interval
-    monitorEdit.status = monitor.status
-    monitorEdit.inverted = monitor.inverted
-    monitorEdit.mode = monitor.mode
-    monitorEdit.url = monitor.url
-    chosen.value = true
-    confirmation.value = false
+    // if clicked same twice
+    if(monitorEdit.id == monitor.id) {
+      resetEdit();
+      chosen.value = false;
+    } else {
+      monitorEdit.id = monitor.id
+      monitorEdit.name = monitor.name
+      monitorEdit.interval = monitor.interval
+      monitorEdit.enabled = monitor.enabled
+      monitorEdit.inverted = monitor.inverted
+      monitorEdit.mode = monitor.mode
+      monitorEdit.url = monitor.url
+      chosen.value = true
+      confirmation.value = false
+      message.value = ""
+      errorMessage.value = ""
+    }
   }
 
   function resetEdit() {
     monitorEdit.id = ""
     monitorEdit.name = ""
     monitorEdit.interval = 60
-    monitorEdit.status = true
+    monitorEdit.enabled = true
     monitorEdit.inverted = false
     monitorEdit.mode = "http"
     monitorEdit.url = ""
     chosen.value = true
     confirmation.value = false
+    message.value = ""
+    errorMessage.value = ""
   }
 
   function sendEdit() {
+    message.value = "Processing"
     fetch(store.state.apiDomain + "/api/edit", {
       method: 'POST',
       headers: {
         'Accept': 'application/json, text/plain, */*',
         'Content-Type': 'application/json'
       },
+      credentials: "include",
       body: JSON.stringify(monitorEdit)
     }).then(res => res.json())
       .then(res => {
+        if (!res.error) {
+          resetEdit()
+          chosen.value = false
+          message.value = "Success"
+        } else {
+          message.value = "Failure"
+          errorMessage.value = "  " + res.error
+        }
         console.log(res)
         store.dispatch('fetchData')
         });
@@ -112,11 +139,20 @@
         'Accept': 'application/json, text/plain, */*',
         'Content-Type': 'application/json'
       },
+      credentials: "include",
       body: JSON.stringify(monitorEdit)
     }).then(res => res.json())
       .then(res => {
+        if (!res.error) {
+          resetEdit()
+          chosen.value = false
+          message.value = "Deletion Successful"
+        } else {
+          message.value = "Failure"
+          errorMessage.value = "  " + res.error
+        }
+
         console.log(res)
-        resetEdit()
         store.dispatch('fetchData')
         });
   }

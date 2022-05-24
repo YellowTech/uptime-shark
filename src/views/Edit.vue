@@ -1,11 +1,10 @@
 <template>
-  <h1 v-if="this.$store.state.error">Oops! An Error Occurred...</h1>
-  <div v-else>
-    <MonitorEdit></MonitorEdit>
-  </div>
+  <Login v-if="!this.$store.state.authenticated" />
+  <MonitorEdit v-else />
 </template>
 
 <script setup lang="ts">
   import MonitorEdit from '@/components/MonitorEdit.vue';
+  import Login from '@/components/Login.vue';
 
 </script>
