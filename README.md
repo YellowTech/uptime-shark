@@ -37,7 +37,7 @@ services:
       # - TELEGRAMKEY=telegram-bot-api-token
       # # your telegram chat id
       # - TELEGRAMCHAT=your-chat-id
-      - APIPASSWORD=yoursupersecretpassword!@#$%$#@!
+      - APIPASSWORD=yoursupersecretpassword!@#%#@!
     ports:
       - 8080:8080
     restart: unless-stopped
