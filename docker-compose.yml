@@ -1,0 +1,14 @@
+version: "3"
+services:
+  uptimeshark:
+    image: shark
+    container_name: uptimeshark
+    volumes:
+      - ./db:/app/db
+    # environment:
+      # - TELEGRAMKEY=longkey
+      # - TELEGRAMCHAT=shortkey
+      # - APIPASSWORD=yoursupersecretpassword!@#$%$#@!
+    ports:
+      - 8080:8080
+    restart: unless-stopped
