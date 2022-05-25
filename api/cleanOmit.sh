@@ -1,4 +1,4 @@
-#!/bin/bash
+#!/bin/sh
 # remove all "omitempty" from the generated json types 
 # such that false is not always removed
 
