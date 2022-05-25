@@ -8,6 +8,7 @@ import (
 	"net/http"
 	"os"
 	"path/filepath"
+	"strconv"
 	"strings"
 	"time"
 	"uptime/api/authentication"
@@ -230,7 +231,7 @@ func main() {
 		log.Fatalf("Failed loading notification entries: %v", err)
     }
 
-	log.Println("Notification services loaded: ", notify)
+	log.Println("Notification services loaded",)
 
 	// launch go routine for periodic checking
 	go periodic(ctx, client)
@@ -272,14 +273,11 @@ func main() {
 		authorized.POST("/api/remove", postRemove);
 	}
 
-
-	// use this for outside of Docker
-	router.Run("localhost:8000")
-	//router.Run("web-input:8080")
+	router.Run()
 }
 
 func CreateService(name string, ctx context.Context, client *ent.Client) (*ent.Monitor, error) {
-	// create service if not existing
+	// create google service if none exist
 	u, err := client.Monitor.Query().Where(Monitor.Name(name)).First(ctx)
 
     if err != nil {
@@ -294,27 +292,10 @@ func CreateService(name string, ctx context.Context, client *ent.Client) (*ent.M
 			SetLogs(make([]logentry.LogEntry, 0)).
 			SetNrLogs(20).
 			SetStatusMessage("Never checked").
-			SetURL("http://google.com").
+			SetURL("https://google.com").
 			SetRetries(5).
 			Save(ctx)
-
-		u, err = client.Monitor.Create().
-			SetName("Yellowtech").
-			SetInterval(10).
-			SetNextCheck(0).
-			SetMode("http").
-			SetStatus(true).
-			SetEnabled(true).
-			SetInverted(false).
-			SetLogs(make([]logentry.LogEntry, 0)).
-			SetNrLogs(20).
-			SetStatusMessage("Never checked").
-			SetURL("https://yellowtech.ch").
-			SetRetries(5).
-			Save(ctx)
-		log.Println("new monitor was created: ", u)
     }
-
     return u, err
 }
 
@@ -339,19 +320,35 @@ func periodic(ctx context.Context, client *ent.Client) {
 			
 			// if needs update
 			if item.NextCheck < time.Now().Unix() {
-				log.Println("Updating ", item.Name)
 				itemUpdate := item.Update()
-				// make http request
-				resp, err := httpClient.Get(item.URL)
 				
 				// the new log entry that is being created
 				var newLogEntry logentry.LogEntry
+
+				var resp *http.Response
+				var err error
+				var errorMessage string
+
+				// retry 3 times if connection error
+				for try := 0; try < 3; try++ {
+					// make http request
+					resp, err = httpClient.Get(item.URL)
+
+					// if no error, stop
+					if err == nil {
+						break
+					} 
+				}
 				
 				// evaluating the results of the request
 				if err != nil || resp.StatusCode >= 300 {
 					newLogEntry = logentry.LogEntry { Failed: true, Message: "ERROR", Time: time.Now().Unix()}
+					if err != nil {
+						errorMessage = err.Error()
+					} else {
+						errorMessage = strconv.Itoa(resp.StatusCode)
+					}
 				} else {
-					fmt.Println(item.Name, resp.StatusCode)
 					newLogEntry = logentry.LogEntry{Failed: false,Message: "OK",Time: time.Now().Unix()}
 				}
 
@@ -375,18 +372,18 @@ func periodic(ctx context.Context, client *ent.Client) {
 				// if not failed and negative status => alert
 				if newLogEntry.Failed == item.Status {
 					itemUpdate.SetStatus(!newLogEntry.Failed)
-					log.Println("Status change for " + item.Name + " deteceted")
+					log.Println("Status change for " + item.Name + " detected")
 
 					// change messages depending on if inverted or not
 					if item.Inverted {
 						if newLogEntry.Failed {
 							notifications.SendMessageToAll(notify, "🔴 " + item.Name + "(inverted) is reachable")
 						} else {
-							notifications.SendMessageToAll(notify, "🟢 " + item.Name + "(inverted) is unreachable")
+							notifications.SendMessageToAll(notify, "🟢 " + item.Name + "(inverted) is unreachable: " + errorMessage)
 						}
 					} else {
 						if newLogEntry.Failed {
-							notifications.SendMessageToAll(notify, "🔴 " + item.Name + " went down")
+							notifications.SendMessageToAll(notify, "🔴 " + item.Name + " went down: " + errorMessage)
 						} else {
 							notifications.SendMessageToAll(notify, "🟢 " + item.Name + " is up")
 						}

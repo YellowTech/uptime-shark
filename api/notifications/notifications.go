@@ -59,7 +59,7 @@ func SetupNotifications(client *ent.Client, ctx context.Context) ([]*Notificatio
 			log.Println("Error loading notification service of type " + entry.Name)
 			continue
 		}
-		newService.SendMessage("Initialized Notification Service")
+		newService.SendMessage("Initialized Notification Service " + entry.Name)
 		services = append(services, newService)		
 	}
 
