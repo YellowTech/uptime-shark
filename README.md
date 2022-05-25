@@ -6,10 +6,12 @@
 
 Uptime-Shark is a simple, self-hosted web monitoring solution. Launch, add your own webpages, receive notifications about downtime.
 
-<div>
-    <img src="./images/StatusPage.jpg" width="400" alt="Uptime-Shark Status Page" />
-    <img src="./images/EditPage.jpg" width="400" alt="Uptime-Shark Status Page" />
+<div align="center">
+    <img src="./images/StatusPage.jpg" height="250" alt="Uptime-Shark Status Page" />
+    <img src="./images/EditPage.jpg" height="250" alt="Uptime-Shark Status Page" />
 </div>
+
+### [Demo](https://demo-uptime-shark.yellowtech.ch/)
 
 # How to Use
 ```
