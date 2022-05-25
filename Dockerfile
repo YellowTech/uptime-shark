@@ -6,7 +6,7 @@ ENV NODE_ENV=production
 RUN yarn
 COPY . .
 RUN yarn build
-RUN rm -f ./dist/*.map
+RUN rm -f ./dist/js/*.map
 
 # build stage for go
 FROM golang:1.17-alpine as backend-build-stage
