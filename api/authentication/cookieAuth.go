@@ -48,7 +48,7 @@ func authLogin(c *gin.Context) {
 		// if password is correct
 		if password == loginReq.Password {
 			c.SetSameSite(http.SameSiteStrictMode)
-			c.SetCookie("auth", key, 3600000, "/", "localhost", true, true)
+			c.SetCookie("auth", key, 3600000, "/", "", true, true)
 			c.JSON(http.StatusOK, gin.H{"success": "Login succeeded"})
 			log.Println("User logged in successfully")
 			return
