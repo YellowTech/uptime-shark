@@ -45,3 +45,11 @@ services:
 ```
 
 To obtain your bot api key and chat id, follow this tutorial: https://tutorial.cytron.io/2021/09/01/how-to-create-a-telegram-bot-get-the-api-key-and-chat-id/
+
+
+# Maintenance (Maintainer only)
+To keep the docker hub image up to date, periodically run
+```
+docker buildx build --platform linux/amd64,linux/arm64,linux/arm/v7 -t yellowtech/uptime-shark:latest --push .
+```
+with a correct buildx builder.
